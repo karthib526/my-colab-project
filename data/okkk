@@ -1,0 +1,42 @@
+# ========================================
+# 12. SHAP Analysis for Best Model
+# ========================================
+import shap
+
+# Ensure plots display properly in notebooks
+shap.initjs()
+
+# Select the best model
+best_model = models[best_model_name]
+
+print(f"\n🔍 Generating SHAP explanations for: {best_model_name}\n")
+
+# Create SHAP explainer (tree models use TreeExplainer, others use KernelExplainer)
+if best_model_name in ["Random Forest", "XGBoost"]:
+    explainer = shap.TreeExplainer(best_model)
+    shap_values = explainer.shap_values(X_test_scaled)
+else:
+    # For Logistic Regression (non-tree model)
+    explainer = shap.KernelExplainer(best_model.predict_proba, X_train_scaled[:100])
+    shap_values = explainer.shap_values(X_test_scaled[:100])
+
+# ========================================
+# 13. SHAP Summary Plot (Global Importance)
+# ========================================
+plt.title(f'SHAP Summary Plot - {best_model_name}')
+if best_model_name in ["Random Forest", "XGBoost"]:
+    shap.summary_plot(shap_values[1], X_test, feature_names=X.columns)
+else:
+    shap.summary_plot(shap_values[1], X_test.iloc[:100], feature_names=X.columns)
+
+# ========================================
+# 14. SHAP Explanation for One Sample (Local)
+# ========================================
+# Pick a random sample from test set
+sample_index = 5
+sample = X_test_scaled[sample_index].reshape(1, -1)
+
+if best_model_name in ["Random Forest", "XGBoost"]:
+    shap.force_plot(explainer.expected_value[1], shap_values[1][sample_index, :], X_test.iloc[sample_index, :])
+else:
+    shap.force_plot(explainer.expected_value[1], shap_values[1][sample_index, :], X_test.iloc[sample_index, :])

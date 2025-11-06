@@ -16,12 +16,26 @@ from xgboost import XGBClassifier
 df = pd.read_csv('data/winequality-red.csv', sep=';') 
  
 #print(df.head())
+ 
+
 
 #print(df.info())
 
 #print(df.describe())
-print(df)
-print(df.corr(numeric_only=True))
+df.corr(numeric_only=True)
 
 sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='coolwarm')
 plt.show()
+target = 'quality'  # change this to your actual target column
+
+# Compute correlation of each feature with target
+corr_with_target = df.corr()[target].sort_values(ascending=False)
+
+# Display all correlations
+print(corr_with_target)
+corr_with_target.drop(target).plot(kind='bar', figsize=(10,5))
+plt.title('Correlation of Features with Target')
+plt.xlabel('Features')
+plt.ylabel('Correlation Coefficient')
+plt.show()
+
